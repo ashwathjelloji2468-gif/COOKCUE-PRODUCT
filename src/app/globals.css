@@ -1,0 +1,323 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-space-grotesk), sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-border: var(--border);
+
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted-surface, var(--muted));
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+
+  --color-danger: var(--destructive);
+  --color-danger-soft: var(--destructive-soft);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+}
+
+:root {
+  --background: #F6F4EF;
+  --foreground: #14110f;
+
+  --card: #ffffff;
+  --card-foreground: #14110f;
+  --card-border: #e2dfd7;
+  --border: #e2dfd7;
+
+  --input: #e2dfd7;
+  --ring: #193D32;
+
+  --popover: #ffffff;
+  --popover-foreground: #14110f;
+
+  --primary: #193D32;
+  --primary-foreground: #ffffff;
+
+  --secondary: #EBE8DF;
+  --secondary-foreground: #193D32;
+
+  /* Surface and readable secondary text tokens */
+  --muted-surface: #EFECE6;
+  --muted: #44403c;
+  --muted-foreground: #44403c;
+
+  --accent: #193D32;
+  --accent-foreground: #ffffff;
+  --accent-hover: #122c24;
+  --accent-soft: #e8f0eb;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --destructive-soft: #fee2e2;
+
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --success-soft: #dcfce7;
+
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --warning-soft: #fef3c7;
+
+  --header-bg: rgba(246, 244, 239, 0.85);
+}
+
+.dark {
+  --background: #0c0f0d;
+  --foreground: #f5f5f4;
+
+  --card: #141916;
+  --card-foreground: #f5f5f4;
+  --card-border: #232d27;
+  --border: #232d27;
+
+  --input: #232d27;
+  --ring: #2e6950;
+
+  --popover: #141916;
+  --popover-foreground: #f5f5f4;
+
+  --primary: #2e6950;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1a231f;
+  --secondary-foreground: #f5f5f4;
+
+  /* Surface and readable secondary text tokens */
+  --muted-surface: #1a231f;
+  --muted: #d6d3d1;
+  --muted-foreground: #d6d3d1;
+
+  --accent: #2e6950;
+  --accent-foreground: #ffffff;
+  --accent-hover: #3c8264;
+  --accent-soft: #14281e;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-soft: #451a1a;
+
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --success-soft: #143520;
+
+  --warning: #f59e0b;
+  --warning-foreground: #000000;
+  --warning-soft: #38280f;
+
+  --header-bg: rgba(12, 15, 13, 0.85);
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================================
+   CookCue Foundation Utilities (A6)
+   ========================================================================= */
+.cc-card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cc-card-raised {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cc-well {
+  background-color: var(--muted-surface, #EFECE6);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.cc-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.cc-num {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.cc-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--muted-surface, #EFECE6);
+  backdrop-filter: blur(8px);
+}
+
+.cc-grid-bg {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+@keyframes cc-shimmer-anim {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.cc-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.cc-shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.25) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: cc-shimmer-anim 2s infinite;
+  content: "";
+}
+
+.cc-live-dot {
+  position: relative;
+  display: inline-flex;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: #22c55e;
+}
+
+.cc-live-dot::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: #22c55e;
+  opacity: 0.75;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* =========================================================================
+   Floor Mode: Ergonomic high-legibility layout for kitchen mobile & stations
+   ========================================================================= */
+[data-floor-mode="true"] {
+  --font-floor-scale: 1.15;
+}
+
+/* Enlarge touch targets on floor stations (>= 44px) */
+[data-floor-mode="true"] button,
+[data-floor-mode="true"] input[type="button"],
+[data-floor-mode="true"] input[type="submit"],
+[data-floor-mode="true"] [role="button"],
+[data-floor-mode="true"] a[role="button"] {
+  min-height: 44px !important;
+  font-size: 1rem !important;
+}
+
+/* Primary actions >= 48px in Floor Mode */
+[data-floor-mode="true"] .floor-primary-btn {
+  min-height: 48px !important;
+  font-size: 1.0625rem !important;
+  font-weight: 700 !important;
+}
+
+/* Hide non-essential explanatory copy in Floor Mode */
+[data-floor-mode="true"] .floor-hide {
+  display: none !important;
+}
+
+/* Emphasize target weights & titles on floor */
+[data-floor-mode="true"] .floor-dish-title {
+  font-size: 1.35rem !important;
+  line-height: 1.85rem !important;
+  font-weight: 800 !important;
+}
+
+[data-floor-mode="true"] .floor-target-weight {
+  font-size: 2.5rem !important;
+  line-height: 2.75rem !important;
+  font-weight: 900 !important;
+}
+
+[data-floor-mode="true"] .floor-input-large {
+  min-height: 48px !important;
+  font-size: 1.125rem !important;
+}

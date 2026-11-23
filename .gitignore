@@ -1,0 +1,45 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing & Coverage
+/coverage
+/test-results
+/playwright-report
+/blob-report
+
+# Next.js build and TypeScript build info
+/.next/
+/out/
+tsconfig.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local database dumps and backups
+*.dump
+*.sql.gz
+backup*.sql
+dump*.sql
+/backups/
+/postgres-data/
+
+# Keys and certificates
+*.pem
+*.key
+*.cert
+
+# Debug and runtime logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and IDE files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db

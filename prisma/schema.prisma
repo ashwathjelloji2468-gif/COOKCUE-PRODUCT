@@ -1,0 +1,394 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contractor {
+  id                 String    @id @default(cuid())
+  code               String    @unique
+  name               String
+  status             String    @default("PENDING")
+  primaryContactName String?
+  contactEmail       String?
+  contactPhone       String?
+  address            String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  kitchens           Kitchen[]
+  users              User[]
+}
+
+model Kitchen {
+  id           String   @id @default(cuid())
+  contractorId String
+  name         String
+  location     String?
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  contractor   Contractor @relation(fields: [contractorId], references: [id])
+  users        User[]
+  meals        Meal[]
+  dishes       Dish[]
+  observations Observation[]
+  cookingPlans CookingPlan[]
+  forecastSnapshots ForecastSnapshot[]
+  staffReports StaffReport[]
+  serviceTemplates KitchenServiceTemplate[]
+  operationalReminderLogs OperationalReminderLog[]
+  procurementIndents ProcurementIndent[]
+
+  @@index([contractorId])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  code         String?  @unique
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  role         String
+  status       String   @default("ACTIVE")
+  contractorId String?
+  kitchenId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  contractor   Contractor? @relation(fields: [contractorId], references: [id])
+  kitchen      Kitchen?    @relation(fields: [kitchenId], references: [id])
+  inAppNotifications InAppNotification[]
+  staffReports StaffReport[]
+  firstApprovedPlans  CookingPlan[] @relation("PlanFirstApprover")
+  secondApprovedPlans CookingPlan[] @relation("PlanSecondApprover")
+  procurementIndents  ProcurementIndent[]
+
+  @@index([contractorId])
+  @@index([kitchenId])
+}
+
+model Dish {
+  id              String   @id @default(cuid())
+  kitchenId       String
+  name            String
+  unit            String   @default("kg")
+  allergenTags    String[] @default([])
+  menuCycleLabel  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  kitchen         Kitchen  @relation(fields: [kitchenId], references: [id])
+  observations    Observation[]
+  planItems       PlanItem[]
+  forecastSnapshots ForecastSnapshot[]
+  procurementIndentLines ProcurementIndentLine[]
+
+  @@unique([kitchenId, name])
+  @@index([kitchenId])
+}
+
+model Meal {
+  id             String   @id @default(cuid())
+  kitchenId      String
+  mealType       String
+  date           DateTime
+  expectedDiners Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  kitchen        Kitchen  @relation(fields: [kitchenId], references: [id])
+  observations   Observation[]
+  cookingPlan    CookingPlan?
+  procurementIndents ProcurementIndent[]
+
+  @@unique([kitchenId, mealType, date])
+  @@index([kitchenId, date])
+}
+
+model Observation {
+  id                 String   @id @default(cuid())
+  kitchenId          String
+  mealId             String
+  dishId             String
+  totalCookedKg      Float?
+  unservedLeftoverKg Float?
+  actualDiners       Int?
+  isStockout         Boolean  @default(false)
+  isAbnormal         Boolean  @default(false)
+  isExcluded         Boolean  @default(false)
+  exclusionReason    String?
+  eligibilityStatus  String   @default("PENDING") // PENDING | ELIGIBLE | INCOMPLETE | NEEDS_REVIEW | EXCLUDED
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  kitchen            Kitchen  @relation(fields: [kitchenId], references: [id])
+  meal               Meal     @relation(fields: [mealId], references: [id])
+  dish               Dish     @relation(fields: [dishId], references: [id])
+  audits             ObservationAudit[]
+
+  @@unique([mealId, dishId])
+  @@index([kitchenId, mealId, dishId])
+  @@index([kitchenId, dishId])
+}
+
+model ObservationAudit {
+  id                      String      @id @default(cuid())
+  observationId           String
+  previousCookedKg        Float?
+  newCookedKg             Float?
+  previousLeftoverKg      Float?
+  newLeftoverKg           Float?
+  previousActualDiners    Int?
+  newActualDiners         Int?
+  previousStockout        Boolean?
+  newStockout             Boolean?
+  previousAbnormal        Boolean?
+  newAbnormal             Boolean?
+  previousExcluded        Boolean?
+  newExcluded             Boolean?
+  previousExclusionReason String?
+  newExclusionReason      String?
+  reason                  String
+  changedByUserId         String?
+  createdAt               DateTime    @default(now())
+  observation             Observation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+
+  @@index([observationId])
+}
+
+model CookingPlan {
+  id               String    @id @default(cuid())
+  kitchenId        String
+  mealId           String    @unique
+  expectedDiners   Int
+  status           String    @default("DRAFT") // DRAFT | PENDING_SECOND_APPROVAL | APPROVED
+  approvalStatus   String    @default("DRAFT") // DRAFT | PENDING_SECOND_APPROVAL | APPROVED
+  instructions     String?
+  firstApproverId  String?
+  firstApprovedAt  DateTime?
+  secondApproverId String?
+  secondApprovedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  kitchen          Kitchen   @relation(fields: [kitchenId], references: [id])
+  meal             Meal      @relation(fields: [mealId], references: [id])
+  items            PlanItem[]
+  firstApprover    User?     @relation("PlanFirstApprover", fields: [firstApproverId], references: [id])
+  secondApprover   User?     @relation("PlanSecondApprover", fields: [secondApproverId], references: [id])
+}
+
+model PlanItem {
+  id                 String      @id @default(cuid())
+  planId             String
+  dishId             String
+  recommendedKg      Float?
+  approvedKg         Float?
+  snapshotBasisJson  String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  plan               CookingPlan @relation(fields: [planId], references: [id])
+  dish               Dish        @relation(fields: [dishId], references: [id])
+  overrides          PlanOverrideAudit[]
+
+  @@unique([planId, dishId])
+}
+
+model PlanOverrideAudit {
+  id                 String    @id @default(cuid())
+  planItemId         String
+  recommendedKg      Float?
+  previousApprovedKg Float?
+  newApprovedKg      Float?
+  reason             String?
+  approvedByUserId   String?
+  createdAt          DateTime  @default(now())
+  planItem           PlanItem  @relation(fields: [planItemId], references: [id], onDelete: Cascade)
+
+  @@index([planItemId])
+}
+
+model OnboardingApplication {
+  id                             String   @id @default(cuid())
+  type                           String   // CONTRACTOR, HEAD_COOK, KITCHEN_STAFF
+  status                         String   @default("PENDING_EMAIL_VERIFICATION")
+  applicantName                  String
+  applicantEmail                 String
+  contractorName                 String?
+  kitchenName                    String?
+  location                       String?
+
+  emailVerifiedAt                DateTime?
+  emailVerificationToken         String?  @unique
+  emailVerificationTokenExpiresAt DateTime?
+
+  reviewedAt                     DateTime?
+  reviewedByUserId               String?
+  rejectionReason                String?
+
+  assignedContractorId           String?
+  assignedKitchenId              String?
+  assignedRole                   String?
+
+  activationToken                String?  @unique
+  activationTokenExpiresAt       DateTime?
+  activatedAt                    DateTime?
+  activatedUserId                String?
+
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  notificationLogs               ApplicationNotificationLog[]
+  inAppNotifications             InAppNotification[]
+
+  @@index([applicantEmail])
+  @@index([status])
+}
+
+model ApplicationNotificationLog {
+  id            String   @id @default(cuid())
+  applicationId String
+  channel       String   @default("EMAIL")
+  recipient     String
+  template      String   // FOUNDER_APPLICATION_ALERT, APPLICANT_EMAIL_VERIFICATION, APPLICANT_APPROVAL_ACTIVATION, APPLICANT_REJECTION
+  status        String   @default("PENDING") // PENDING, SENT, FAILED
+  errorMessage  String?
+  attemptCount  Int      @default(0)
+  lastAttemptAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application   OnboardingApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([status])
+}
+
+model InAppNotification {
+  id             String                 @id @default(cuid())
+  userId         String
+  title          String
+  message        String
+  type           String                 @default("APPROVAL_WELCOME")
+  acknowledgedAt DateTime?
+  createdAt      DateTime               @default(now())
+  applicationId  String?
+
+  application    OnboardingApplication? @relation(fields: [applicationId], references: [id])
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, acknowledgedAt])
+}
+
+model ForecastSnapshot {
+  id             String   @id @default(cuid())
+  kitchenId      String
+  mealType       String
+  dishId         String
+  recommendedKg  Float?
+  eligibleCount  Int
+  expectedDiners Int
+  computedAt     DateTime @default(now())
+
+  kitchen Kitchen @relation(fields: [kitchenId], references: [id], onDelete: Cascade)
+  dish    Dish    @relation(fields: [dishId], references: [id], onDelete: Cascade)
+
+  @@index([kitchenId, mealType, dishId])
+  @@index([computedAt])
+}
+
+model StaffReport {
+  id          String   @id @default(cuid())
+  kitchenId   String
+  date        DateTime
+  mealType    String   @default("LUNCH")
+  type        String   // PROGRESS | QUANTITY_REPORT | PROBLEM
+  title       String?
+  content     String
+  dishId      String?
+  quantityKg  Float?
+  flagged     Boolean  @default(false)
+  resolved    Boolean  @default(false)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  kitchen     Kitchen  @relation(fields: [kitchenId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([kitchenId, date])
+}
+
+model KitchenServiceTemplate {
+  id                    String   @id @default(cuid())
+  kitchenId             String
+  name                  String
+  mealType              String
+  defaultExpectedDiners Int?
+  dishIds               String   // JSON-encoded array of Dish IDs
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  kitchen Kitchen @relation(fields: [kitchenId], references: [id], onDelete: Cascade)
+
+  @@unique([kitchenId, name])
+  @@index([kitchenId])
+}
+
+model OperationalReminderLog {
+  id           String   @id @default(cuid())
+  kitchenId    String
+  mealType     String
+  serviceDate  String   // YYYY-MM-DD
+  type         String   // PLAN_NOT_APPROVED | CLOSEOUT_MISSING
+  channel      String   @default("EMAIL") // EMAIL, SMS, WHATSAPP
+  recipient    String
+  status       String   @default("SENT") // SENT, FAILED, SKIPPED
+  summary      String?
+  errorMessage String?
+  sentAt       DateTime @default(now())
+
+  kitchen      Kitchen  @relation(fields: [kitchenId], references: [id], onDelete: Cascade)
+
+  @@index([kitchenId, mealType, serviceDate, type, sentAt])
+}
+
+model ProcurementIndent {
+  id          String                  @id @default(cuid())
+  kitchenId   String
+  mealId      String
+  date        DateTime
+  mealType    String
+  status      String                  @default("DRAFT") // DRAFT | REQUESTED | CANCELLED
+  createdById String
+  requestedAt DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  kitchen     Kitchen                 @relation(fields: [kitchenId], references: [id], onDelete: Cascade)
+  meal        Meal                    @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  createdBy   User                    @relation(fields: [createdById], references: [id])
+  lines       ProcurementIndentLine[]
+
+  @@index([kitchenId, date])
+  @@index([mealId])
+  @@index([kitchenId, status])
+}
+
+model ProcurementIndentLine {
+  id             String            @id @default(cuid())
+  indentId       String
+  dishId         String?
+  dishName       String
+  targetKg       Float
+  unit           String            @default("kg")
+  allergenTags   String[]          @default([])
+  menuCycleLabel String?
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  indent         ProcurementIndent @relation(fields: [indentId], references: [id], onDelete: Cascade)
+  dish           Dish?             @relation(fields: [dishId], references: [id], onDelete: SetNull)
+
+  @@index([indentId])
+  @@index([dishId])
+}
+
