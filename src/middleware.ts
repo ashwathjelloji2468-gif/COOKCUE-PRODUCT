@@ -75,15 +75,15 @@ export async function middleware(request: NextRequest) {
       pathname === "/founder/preferences";
 
     if (!isAccountRoute && session.role !== "FOUNDER") {
-      if (session.contractorId) {
-        return NextResponse.redirect(
-          new URL(`/contractor/${session.contractorId}`, request.url)
-        );
-      }
       if (session.kitchenId) {
         const homeSubpath = session.role === "KITCHEN_STAFF" ? "staff-board" : "morning";
         return NextResponse.redirect(
           new URL(`/kitchen/${session.kitchenId}/${homeSubpath}`, request.url)
+        );
+      }
+      if (session.contractorId) {
+        return NextResponse.redirect(
+          new URL(`/contractor/${session.contractorId}`, request.url)
         );
       }
       return NextResponse.redirect(new URL("/login?error=missing_assignment", request.url));

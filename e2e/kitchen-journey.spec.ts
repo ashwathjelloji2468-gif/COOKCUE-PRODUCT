@@ -118,6 +118,43 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
         unit: "kg",
       },
     });
+
+    // 6. Ensure Demo Closed Lunch Meal with Observation for Results Dashboard tests
+    const demoLunchDate = new Date("2026-11-20T00:00:00.000Z");
+    const demoLunchMeal = await prisma.meal.upsert({
+      where: {
+        kitchenId_mealType_date: {
+          kitchenId: KITCHEN_A_ID,
+          mealType: "LUNCH",
+          date: demoLunchDate,
+        },
+      },
+      update: {},
+      create: {
+        kitchenId: KITCHEN_A_ID,
+        mealType: "LUNCH",
+        date: demoLunchDate,
+        expectedDiners: 150,
+      },
+    });
+
+    await prisma.observation.upsert({
+      where: {
+        mealId_dishId: {
+          mealId: demoLunchMeal.id,
+          dishId: "seed-dish-1",
+        },
+      },
+      update: {},
+      create: {
+        kitchenId: KITCHEN_A_ID,
+        mealId: demoLunchMeal.id,
+        dishId: "seed-dish-1",
+        actualDiners: 148,
+        totalCookedKg: 30.0,
+        unservedLeftoverKg: 1.5,
+      },
+    });
   });
 
   test.afterAll(async () => {

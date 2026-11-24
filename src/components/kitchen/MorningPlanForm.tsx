@@ -318,7 +318,7 @@ export function MorningPlanForm({ kitchenId }: { kitchenId: string }) {
       return;
     }
 
-    setMessage("Cooking plan approved successfully! Plan is verified and ready for production.");
+    setMessage("Cooking plan approved and saved! Plan is verified and ready for production.");
     await loadPlanForService();
   }
 
@@ -763,11 +763,21 @@ export function MorningPlanForm({ kitchenId }: { kitchenId: string }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={selectAllDishes}
+                  onClick={() => setSelectedDishIds(dishes.map((d) => d.id))}
                   className="text-xs min-h-[44px] sm:min-h-[28px] h-auto py-2 sm:py-1 px-3 text-muted-foreground hover:text-foreground font-medium"
                 >
-                  {selectedDishIds.length === dishes.length ? "Deselect All" : "Select All"}
+                  Select All Dishes
                 </Button>
+                {selectedDishIds.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedDishIds([])}
+                    className="text-xs min-h-[44px] sm:min-h-[28px] h-auto py-2 sm:py-1 px-3 text-muted-foreground hover:text-foreground font-medium"
+                  >
+                    Deselect All
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -818,7 +828,7 @@ export function MorningPlanForm({ kitchenId }: { kitchenId: string }) {
                 className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs min-h-[44px] sm:min-h-[36px] px-4"
               >
                 <Sparkles className="w-3.5 h-3.5 text-accent-soft" />
-                <span>{loading ? "Computing Quantities..." : "Generate Recommendations"}</span>
+                <span>{loading ? "Computing Quantities..." : "Generate Pure Baseline Recommendations"}</span>
               </Button>
             </div>
           )}
@@ -830,7 +840,7 @@ export function MorningPlanForm({ kitchenId }: { kitchenId: string }) {
         <div className="space-y-4">
           <div>
             <h3 className="text-base font-bold font-heading text-foreground">
-              3. Recommended Quantities &amp; Targets
+              3. Recommended Production Quantities &amp; Targets
             </h3>
             <p className="text-xs text-muted-foreground">
               {isApproved
@@ -912,9 +922,7 @@ export function MorningPlanForm({ kitchenId }: { kitchenId: string }) {
                     <span>
                       {submitting
                         ? "Approving Plan..."
-                        : isApproved
-                        ? "Re-approve plan"
-                        : "Approve plan"}
+                        : "Approve & Save Cooking Plan"}
                     </span>
                   </Button>
                 </div>
