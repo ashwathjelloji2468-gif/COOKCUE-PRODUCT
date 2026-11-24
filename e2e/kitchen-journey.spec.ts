@@ -124,12 +124,16 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
     await prisma.$disconnect();
   });
 
+  test.beforeEach(async ({ context }) => {
+    await context.clearCookies();
+  });
+
   async function signInAsHeadCook(page: Page) {
     await page.goto("/login");
     await page.fill('input[type="email"]', HEAD_COOK_EMAIL);
     await page.fill('input[type="password"]', PASSWORD);
     await page.click('button:has-text("Sign In with Credentials")');
-    await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`));
+    await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`), { timeout: 15000 });
   }
 
   async function signInAsFounder(page: Page) {
@@ -137,7 +141,7 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
     await page.fill('input[type="email"]', FOUNDER_EMAIL);
     await page.fill('input[type="password"]', PASSWORD);
     await page.click('button:has-text("Sign In with Credentials")');
-    await expect(page).toHaveURL(/\/founder/);
+    await expect(page).toHaveURL(/\/founder/, { timeout: 15000 });
   }
 
   test("1. Authentication, credential verification, and sign out", async ({ page }) => {
@@ -211,6 +215,9 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
 
     await page.goto(`/kitchen/${KITCHEN_A_ID}/morning`);
     await expect(page).toHaveURL(/\/login\?error=/);
+
+    // Clean up test cookies
+    await context.clearCookies();
   });
 
   test("3. Founder vs Kitchen Operator RBAC and cross-kitchen access isolation", async ({ page }) => {

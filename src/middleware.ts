@@ -18,19 +18,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const sessionCookie =
-    request.cookies.get("cookcue_session")?.value ||
-    request.cookies.get("messwise_session")?.value;
+  const cookcueToken = request.cookies.get("cookcue_session")?.value;
+  const messwiseToken = request.cookies.get("messwise_session")?.value;
 
   // If no session cookie, redirect to /login
-  if (!sessionCookie) {
+  if (!cookcueToken && !messwiseToken) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // 1. Verify Cryptographic HMAC-SHA256 signature via Web Crypto API (Edge compliant)
-  const session = await verifySessionToken<SessionUser>(sessionCookie);
+  // Try cookcue_session first; fall back to legacy messwise_session if cookcue_session is absent or invalid
+  let session = cookcueToken ? await verifySessionToken<SessionUser>(cookcueToken) : null;
+  if (!session && messwiseToken) {
+    session = await verifySessionToken<SessionUser>(messwiseToken);
+  }
+
   if (!session) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "invalid_session");
