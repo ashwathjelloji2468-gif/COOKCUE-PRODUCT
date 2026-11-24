@@ -14,7 +14,6 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AmbientBackground, FadeIn } from "@/components/motion";
 import {
   ArrowRight,
-  ArrowLeft,
   AlertCircle,
   Lock,
   Mail,
@@ -25,8 +24,6 @@ import {
   Building2,
   ChefHat,
   Users,
-  ChevronRight,
-  CheckCircle2,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -111,14 +108,6 @@ function LoginFormContent() {
     window.location.href = targetUrl;
   }
 
-  function handleBackToChooser() {
-    setSelectedRole(null);
-    setError(null);
-    setEmail("");
-    setPassword("");
-    setShowPassword(false);
-  }
-
   return (
     <FadeIn direction="up" distance={16} duration={0.4} className="w-full max-w-md space-y-6 relative z-10">
       {/* Editorial Header */}
@@ -163,233 +152,183 @@ function LoginFormContent() {
         </div>
       )}
 
-      {/* STATE A: Initial Role Chooser */}
-      {selectedRole === null ? (
-        <div className="space-y-4">
-          <div className="text-center space-y-1">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-foreground font-heading">
-              Select Your Operational Role
-            </h2>
-            <p className="text-[11px] text-muted-foreground">
-              Choose your institutional assignment to access your dedicated station.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2.5">
-            {PUBLIC_ROLES.map((role) => {
-              const Icon = role.icon;
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => setSelectedRole(role.id)}
-                  className="w-full p-4 rounded-xl border border-border bg-card hover:border-primary hover:bg-accent-soft/30 text-left transition-all duration-200 flex items-start justify-between group shadow-xs hover:shadow-sm"
-                >
-                  <div className="flex items-start gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-card border border-border group-hover:border-primary/40 flex items-center justify-center shrink-0 shadow-2xs transition-colors">
-                      <Icon className={`w-5 h-5 ${role.accentColor}`} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-heading font-bold text-sm text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                        <span>{role.title}</span>
-                      </div>
-                      <div className="text-[11px] font-medium text-muted-foreground">
-                        {role.subtitle}
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">
-                        {role.description}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2.5 ml-2" />
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={() => setSelectedRole("FOUNDER")}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 font-medium transition-colors"
-            >
-              Have universal credentials? Direct Sign In
-            </button>
-          </div>
-
-          {/* Onboarding Applicant Direct Paths */}
-          <div className="pt-3 border-t border-border/60">
-            <div className="text-[11px] font-semibold text-muted-foreground text-center mb-2">
-              New to CookCue? Apply for facility access:
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <Link
-                href="/onboard?type=contractor"
-                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
-              >
-                <Building2 className="w-4 h-4 mb-1 text-amber-500 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold text-foreground">Register Contractor</span>
-                <span className="text-[9px] text-muted-foreground">New organization</span>
-              </Link>
-              <Link
-                href="/onboard?type=head_cook"
-                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
-              >
-                <ChefHat className="w-4 h-4 mb-1 text-[#D9EF79] group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold text-foreground">Apply as Head Cook</span>
-                <span className="text-[9px] text-muted-foreground">Recipe station</span>
-              </Link>
-              <Link
-                href="/onboard?type=staff"
-                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
-              >
-                <Users className="w-4 h-4 mb-1 text-sky-400 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold text-foreground">Apply as Staff</span>
-                <span className="text-[9px] text-muted-foreground">Kitchen floor</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* STATE B: Role-Specific Sign In Form */
-        <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      {/* Unified Credential Sign In Card */}
+      <Card className="border-border shadow-md bg-card overflow-hidden transition-colors">
+        <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-accent-soft" />
+        <CardHeader className="pb-3 pt-5">
           <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handleBackToChooser}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to role selection</span>
-            </button>
-
-            {activeRoleMeta && (
+            <div>
+              <CardTitle className="text-sm font-heading font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-primary" />
+                <span>Sign In with Credentials</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                {activeRoleMeta
+                  ? `Enter verified credentials for ${activeRoleMeta.title}.`
+                  : "Enter your authorized credentials to access your station or console."}
+              </CardDescription>
+            </div>
+            {activeRoleMeta ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-muted text-foreground border border-border">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                 <span>{activeRoleMeta.badgeLabel}</span>
               </span>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-primary bg-accent-soft px-2.5 py-1 rounded-full border border-primary/20">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                <span>Verified Access</span>
+              </div>
             )}
           </div>
-
-          <Card className="border-border shadow-md bg-card overflow-hidden transition-colors">
-            <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-accent-soft" />
-            <CardHeader className="pb-4 pt-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-sm font-heading font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                    <KeyRound className="w-4 h-4 text-primary" />
-                    {activeRoleMeta?.title} Sign In
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                    Enter your verified {activeRoleMeta?.subtitle.toLowerCase()} credentials.
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-medium text-primary bg-accent-soft px-2.5 py-1 rounded-full border border-primary/20">
-                  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                  <span>Verified Access</span>
-                </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleCredentialLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="login-email" className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider block">
+                Institutional Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
+                <Input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  placeholder={activeRoleMeta?.emailPlaceholder || "headcook@central-kitchen-a.com"}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  aria-invalid={Boolean(error)}
+                  className="h-10 text-xs pl-9"
+                  required
+                  autoFocus
+                />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleCredentialLogin} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="login-email" className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider block">
-                    Institutional Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder={activeRoleMeta?.emailPlaceholder || "name@organization.com"}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
-                      aria-invalid={Boolean(error)}
-                      className="h-10 text-xs pl-9"
-                      required
-                      autoFocus
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="login-password" className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider block">
-                      Password
-                    </label>
-                    <span className="text-[10px] text-muted-foreground">Authorized personnel</span>
-                  </div>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
-                    <Input
-                      id="login-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      aria-invalid={Boolean(error)}
-                      className="h-10 text-xs pl-9 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      title={showPassword ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-2.5 p-1 text-muted-foreground hover:text-foreground rounded transition-colors focus:outline-hidden focus:ring-1 focus:ring-primary"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading || !email || !password}
-                  className="w-full h-10 text-xs font-semibold mt-2"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                      Verifying Credentials...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      {activeRoleMeta?.id === "FOUNDER"
-                        ? "Sign In with Credentials"
-                        : `Sign In as ${activeRoleMeta?.title || "Operator"}`}
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Role-Specific Onboarding Link: Only shown for the selected role */}
-          {activeRoleMeta?.onboardAction && (
-            <div className="p-3.5 rounded-xl border border-border bg-card flex items-center justify-between gap-3 transition-colors">
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-foreground font-heading">
-                  {activeRoleMeta.onboardAction.label}
-                </div>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {activeRoleMeta.onboardAction.description}
-                </p>
-              </div>
-              <Button asChild size="sm" variant="outline" className="text-xs shrink-0 h-8 border-border">
-                <Link href={activeRoleMeta.onboardAction.href}>
-                  Apply
-                </Link>
-              </Button>
             </div>
-          )}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label htmlFor="login-password" className="text-[11px] font-bold text-foreground/80 uppercase tracking-wider block">
+                  Password
+                </label>
+                <span className="text-[10px] text-muted-foreground">Authorized personnel</span>
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
+                <Input
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  aria-invalid={Boolean(error)}
+                  className="h-10 text-xs pl-9 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-2.5 p-1 text-muted-foreground hover:text-foreground rounded transition-colors focus:outline-hidden focus:ring-1 focus:ring-primary"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="w-full h-10 text-xs font-semibold mt-2"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                  Verifying Credentials...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <span>Sign In with Credentials</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Role Station Directory */}
+      <div className="space-y-2 pt-1">
+        <div className="text-[11px] font-semibold text-muted-foreground text-center">
+          Role Station Directory
         </div>
-      )}
+        <div className="grid grid-cols-3 gap-2">
+          {PUBLIC_ROLES.map((role) => {
+            const Icon = role.icon;
+            const isSelected = selectedRole === role.id;
+            return (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => {
+                  setSelectedRole(isSelected ? null : role.id);
+                  if (!email) setEmail(role.emailPlaceholder);
+                }}
+                className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center group ${
+                  isSelected
+                    ? "border-primary bg-primary/10 shadow-xs"
+                    : "border-border bg-card/60 hover:border-primary/50 hover:bg-muted"
+                }`}
+              >
+                <Icon className={`w-4 h-4 mb-1 ${role.accentColor}`} />
+                <span className="text-[11px] font-bold text-foreground block truncate w-full">
+                  {role.title}
+                </span>
+                <span className="text-[9px] text-muted-foreground block truncate w-full">
+                  {role.subtitle}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Onboarding Applicant Direct Paths */}
+      <div className="pt-2 border-t border-border/60">
+        <div className="text-[11px] font-semibold text-muted-foreground text-center mb-2">
+          New to CookCue? Apply for facility access:
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <Link
+            href="/onboard?type=contractor"
+            className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+          >
+            <Building2 className="w-4 h-4 mb-1 text-amber-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[11px] font-bold text-foreground">Register Contractor</span>
+            <span className="text-[9px] text-muted-foreground">New organization</span>
+          </Link>
+          <Link
+            href="/onboard?type=head_cook"
+            className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+          >
+            <ChefHat className="w-4 h-4 mb-1 text-[#D9EF79] group-hover:scale-110 transition-transform" />
+            <span className="text-[11px] font-bold text-foreground">Apply as Head Cook</span>
+            <span className="text-[9px] text-muted-foreground">Recipe station</span>
+          </Link>
+          <Link
+            href="/onboard?type=staff"
+            className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+          >
+            <Users className="w-4 h-4 mb-1 text-sky-400 group-hover:scale-110 transition-transform" />
+            <span className="text-[11px] font-bold text-foreground">Apply as Staff</span>
+            <span className="text-[9px] text-muted-foreground">Kitchen floor</span>
+          </Link>
+        </div>
+      </div>
 
       {/* Footer reassurance & legal links */}
       <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground font-medium pt-2">
