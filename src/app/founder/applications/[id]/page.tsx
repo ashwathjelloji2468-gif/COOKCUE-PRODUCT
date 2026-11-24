@@ -66,9 +66,9 @@ export default async function ApplicationDetailPage({ params }: Props) {
               )}
             </div>
 
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               {app.applicantName}
-            </h1>
+            </h2>
             <p className="text-xs text-muted-foreground font-mono">
               ID: {app.id} • Submitted {new Date(app.createdAt).toLocaleString()}
             </p>

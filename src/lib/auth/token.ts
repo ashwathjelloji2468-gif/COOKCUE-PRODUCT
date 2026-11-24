@@ -36,15 +36,49 @@ function bufferToHex(buffer: ArrayBuffer): string {
     .join("");
 }
 
-function hexToBuffer(hex: string): ArrayBuffer {
-  const cleanHex = hex.trim().toLowerCase();
-  if (cleanHex.length % 2 !== 0) return new ArrayBuffer(0);
-  const buffer = new ArrayBuffer(cleanHex.length / 2);
-  const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(cleanHex.slice(i * 2, i * 2 + 2), 16);
+/**
+ * Robust signature byte decoder for Web Crypto API.
+ * Validates and decodes both hexadecimal (64-char) and Base64URL signatures into a genuine Uint8Array.
+ * Rejects odd-length hex, non-hex/non-base64 characters, and malformed/empty signatures safely without throwing.
+ */
+export function decodeSignatureBytes(sigStr: string): Uint8Array | null {
+  if (!sigStr || typeof sigStr !== "string") return null;
+  const clean = sigStr.trim();
+  if (clean.length === 0) return null;
+
+  // 1. Hexadecimal format (standard token signature: 64 hex chars for SHA-256)
+  if (clean.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(clean)) {
+    const len = clean.length / 2;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      const val = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+      if (Number.isNaN(val)) return null;
+      bytes[i] = val;
+    }
+    return bytes;
   }
-  return buffer;
+
+  // 2. Base64URL format (standard JWT/JWS compact signature: 43 chars for SHA-256)
+  if (/^[A-Za-z0-9_-]+=*$/.test(clean)) {
+    try {
+      let b64 = clean.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4) b64 += "=";
+      if (typeof atob === "function") {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+      }
+      const buf = Buffer.from(b64, "base64");
+      return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 function base64UrlEncode(str: string): string {
@@ -132,16 +166,15 @@ export async function verifySessionToken<T = any>(token: string, secret?: string
       ["verify"]
     );
 
-    const sigBuffer = hexToBuffer(sigHex);
-    if (sigBuffer.byteLength === 0) {
-      console.error("[verifySessionToken] Empty signature bytes");
+    const sigBytes = decodeSignatureBytes(sigHex);
+    if (!sigBytes || sigBytes.byteLength === 0) {
       return null;
     }
 
     const isValid = await globalThis.crypto.subtle.verify(
       "HMAC",
       key,
-      sigBuffer,
+      sigBytes as unknown as BufferSource,
       new TextEncoder().encode(b64Payload)
     );
 

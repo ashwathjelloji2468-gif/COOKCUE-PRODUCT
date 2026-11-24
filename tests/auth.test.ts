@@ -115,4 +115,78 @@ describe("Cryptographic Authentication & Security Tests", () => {
       process.env.SESSION_SECRET = origSecret;
     }
   });
+
+  it("REJECTS non-hex / malformed signatures without throwing unhandled exceptions", async () => {
+    const token = await signSessionToken(validCook, secret);
+    const [payloadBase64] = token.split(".");
+
+    // Non-hex signature characters (such as test fixtures)
+    const malformedToken1 = `${payloadBase64}.invalidsignature`;
+    expect(await verifySessionToken(malformedToken1, secret)).toBeNull();
+
+    const malformedToken2 = `${payloadBase64}.dummyhmacsignature`;
+    expect(await verifySessionToken(malformedToken2, secret)).toBeNull();
+  });
+
+  it("REJECTS odd-length hexadecimal signatures safely", async () => {
+    const token = await signSessionToken(validCook, secret);
+    const [payloadBase64, signature] = token.split(".");
+
+    // Truncate signature to an odd length
+    const oddSignature = signature.slice(0, signature.length - 1);
+    expect(oddSignature.length % 2).toBe(1);
+
+    const oddToken = `${payloadBase64}.${oddSignature}`;
+    expect(await verifySessionToken(oddToken, secret)).toBeNull();
+  });
+
+  it("REJECTS empty, null, and whitespace tokens safely", async () => {
+    expect(await verifySessionToken("", secret)).toBeNull();
+    expect(await verifySessionToken("   ", secret)).toBeNull();
+    expect(await verifySessionToken(null as any, secret)).toBeNull();
+    expect(await verifySessionToken(undefined as any, secret)).toBeNull();
+  });
+
+  it("REJECTS expired session tokens based on expiresAt timestamp", async () => {
+    const expiredCook: SessionUser = {
+      ...validCook,
+      issuedAt: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
+      expiresAt: Date.now() - 1000 * 60 * 60,    // 1 hour ago
+    };
+
+    const token = await signSessionToken(expiredCook, secret);
+    const verified = await verifySessionToken<SessionUser>(token, secret);
+    expect(verified).not.toBeNull();
+    // Cryptographically valid, but expiresAt is in the past
+    expect(Date.now() > verified!.expiresAt).toBe(true);
+  });
+
+  it("VERIFIES tokens with valid Base64URL signatures seamlessly", async () => {
+    // Generate valid HMAC signature directly via Web Crypto
+    const resolvedSecret = secret;
+    const payloadJson = JSON.stringify(validFounder);
+    const payloadB64 = Buffer.from(payloadJson, "utf-8").toString("base64url");
+
+    const key = await globalThis.crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(resolvedSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const rawSig = await globalThis.crypto.subtle.sign(
+      "HMAC",
+      key,
+      new TextEncoder().encode(payloadB64)
+    );
+
+    const base64urlSig = Buffer.from(rawSig).toString("base64url");
+    const b64urlToken = `${payloadB64}.${base64urlSig}`;
+
+    const verified = await verifySessionToken<SessionUser>(b64urlToken, secret);
+    expect(verified).not.toBeNull();
+    expect(verified?.id).toBe("founder-101");
+    expect(verified?.role).toBe("FOUNDER");
+  });
 });

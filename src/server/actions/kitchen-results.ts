@@ -183,6 +183,31 @@ export async function getKitchenResultsDashboard(filterInput: {
           auditCount: obs.audits.length,
         });
       }
+
+      if (meal.observations.length === 0 && meal.cookingPlan) {
+        for (const item of meal.cookingPlan.items) {
+          if (!dishId || dishId === "ALL" || dishId === item.dishId) {
+            records.push({
+              id: `${meal.id}-${item.id}`,
+              date: meal.date.toISOString().slice(0, 10),
+              mealType: meal.mealType,
+              dishId: item.dishId,
+              dishName: item.dish.name,
+              suggestedKg: item.recommendedKg,
+              approvedKg: item.approvedKg,
+              totalCookedKg: null,
+              unservedLeftoverKg: null,
+              actualDiners: null,
+              leftoverPerDiner: null,
+              isStockout: false,
+              isAbnormal: false,
+              isExcluded: false,
+              exclusionReason: null,
+              auditCount: 0,
+            });
+          }
+        }
+      }
     }
 
     // Safe division: leftoverPerDiner is null if totalActualDiners is 0 or negative
