@@ -55,7 +55,7 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Seed test accounts and initial facilities
-        run: npm run db:seed
+        run: npm run db:seed && npm run db:seed-demo
 
       - name: Build Next.js application
         run: npm run build

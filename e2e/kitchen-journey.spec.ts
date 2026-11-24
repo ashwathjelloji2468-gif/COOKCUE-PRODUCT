@@ -15,6 +15,115 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
   const randomDay = String((Date.now() % 28) + 1).padStart(2, "0");
   const testDate = `2028-${randomMonth}-${randomDay}`;
 
+  test.beforeAll(async () => {
+    const passwordHash = hashPassword(PASSWORD);
+
+    // 1. Ensure Demo Contractor
+    let contractor = await prisma.contractor.findFirst({
+      where: { OR: [{ id: "seed-contractor-1" }, { code: "CTR-000001" }] },
+    });
+    if (!contractor) {
+      contractor = await prisma.contractor.create({
+        data: {
+          id: "seed-contractor-1",
+          code: "CTR-000001",
+          name: "Demo Contractor Pvt Ltd",
+          status: "ACTIVE",
+        },
+      });
+    }
+
+    // 2. Ensure Demo Kitchens
+    await prisma.kitchen.upsert({
+      where: { id: KITCHEN_A_ID },
+      update: { contractorId: contractor.id, status: "ACTIVE" },
+      create: {
+        id: KITCHEN_A_ID,
+        contractorId: contractor.id,
+        name: "Central Kitchen A",
+        location: "Bangalore",
+        status: "ACTIVE",
+      },
+    });
+
+    await prisma.kitchen.upsert({
+      where: { id: KITCHEN_B_ID },
+      update: { contractorId: contractor.id, status: "ACTIVE" },
+      create: {
+        id: KITCHEN_B_ID,
+        contractorId: contractor.id,
+        name: "Hostel Kitchen B",
+        location: "Hyderabad",
+        status: "ACTIVE",
+      },
+    });
+
+    // 3. Ensure Founder User with PASSWORD ("DevPassword@123")
+    await prisma.user.upsert({
+      where: { email: FOUNDER_EMAIL },
+      update: {
+        passwordHash,
+        status: "ACTIVE",
+        role: "FOUNDER",
+      },
+      create: {
+        email: FOUNDER_EMAIL,
+        name: "Platform Founder",
+        role: "FOUNDER",
+        status: "ACTIVE",
+        passwordHash,
+      },
+    });
+
+    // 4. Ensure Head Cook User with PASSWORD ("DevPassword@123")
+    await prisma.user.upsert({
+      where: { email: HEAD_COOK_EMAIL },
+      update: {
+        passwordHash,
+        status: "ACTIVE",
+        role: "HEAD_COOK",
+        kitchenId: KITCHEN_A_ID,
+        contractorId: contractor.id,
+      },
+      create: {
+        email: HEAD_COOK_EMAIL,
+        name: "Chef Rajesh",
+        role: "HEAD_COOK",
+        status: "ACTIVE",
+        kitchenId: KITCHEN_A_ID,
+        contractorId: contractor.id,
+        passwordHash,
+      },
+    });
+
+    // 5. Ensure Seed Dishes for Kitchen A
+    await prisma.dish.upsert({
+      where: { id: "seed-dish-1" },
+      update: { kitchenId: KITCHEN_A_ID },
+      create: {
+        id: "seed-dish-1",
+        kitchenId: KITCHEN_A_ID,
+        name: "Rice",
+        unit: "kg",
+      },
+    });
+
+    await prisma.dish.upsert({
+      where: { id: "seed-dish-2" },
+      update: { kitchenId: KITCHEN_A_ID },
+      create: {
+        id: "seed-dish-2",
+        kitchenId: KITCHEN_A_ID,
+        name: "Dal",
+        unit: "kg",
+      },
+    });
+  });
+
+  test.afterAll(async () => {
+    await prisma.$disconnect();
+  });
+
   async function signInAsHeadCook(page: Page) {
     await page.goto("/login");
     await page.fill('input[type="email"]', HEAD_COOK_EMAIL);

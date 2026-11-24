@@ -90,7 +90,7 @@ async function main() {
   });
 
   const staffPasswordHash = hashPassword("DevPassword@123");
-  const founderPasswordHash = hashPassword("Aisha@Ashwath");
+  const founderPasswordHash = hashPassword(process.env.FOUNDER_DEMO_PASSWORD || "DevPassword@123");
 
   // Platform Founder account
   const uFounder = await prisma.user.findUnique({ where: { email: "cookcue149@gmail.com" } });
