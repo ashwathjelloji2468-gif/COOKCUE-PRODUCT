@@ -1,7 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { prisma } from "../src/lib/prisma";
 import { getSentEmails } from "../src/lib/email";
-import { hashBearerToken } from "../src/lib/auth/crypto";
+import { hashPassword, hashBearerToken } from "../src/lib/auth/crypto";
 
 test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
   const KITCHEN_A_ID = "seed-kitchen-1";
