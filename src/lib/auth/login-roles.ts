@@ -31,7 +31,7 @@ export const PUBLIC_ROLES: RoleMetadata[] = [
     badgeLabel: "Contractor Manager",
     emailPlaceholder: "manager@catering.com",
     onboardAction: {
-      label: "Register New Contractor",
+      label: "Register Contractor",
       description: "Apply for a new institutional catering organization account",
       href: "/onboard?type=contractor",
     },
@@ -61,7 +61,7 @@ export const PUBLIC_ROLES: RoleMetadata[] = [
     badgeLabel: "Kitchen Staff",
     emailPlaceholder: "staff@kitchen.com",
     onboardAction: {
-      label: "Apply as Kitchen Staff",
+      label: "Apply as Staff",
       description: "Request staff credentials for your facility team",
       href: "/onboard?type=staff",
     },

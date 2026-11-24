@@ -216,6 +216,39 @@ function LoginFormContent() {
               Have universal credentials? Direct Sign In
             </button>
           </div>
+
+          {/* Onboarding Applicant Direct Paths */}
+          <div className="pt-3 border-t border-border/60">
+            <div className="text-[11px] font-semibold text-muted-foreground text-center mb-2">
+              New to CookCue? Apply for facility access:
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Link
+                href="/onboard?type=contractor"
+                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+              >
+                <Building2 className="w-4 h-4 mb-1 text-amber-500 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold text-foreground">Register Contractor</span>
+                <span className="text-[9px] text-muted-foreground">New organization</span>
+              </Link>
+              <Link
+                href="/onboard?type=head_cook"
+                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+              >
+                <ChefHat className="w-4 h-4 mb-1 text-[#D9EF79] group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold text-foreground">Apply as Head Cook</span>
+                <span className="text-[9px] text-muted-foreground">Recipe station</span>
+              </Link>
+              <Link
+                href="/onboard?type=staff"
+                className="flex flex-col items-center justify-center p-2 rounded-lg border border-border bg-card/60 hover:bg-muted text-center transition-colors group"
+              >
+                <Users className="w-4 h-4 mb-1 text-sky-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold text-foreground">Apply as Staff</span>
+                <span className="text-[9px] text-muted-foreground">Kitchen floor</span>
+              </Link>
+            </div>
+          </div>
         </div>
       ) : (
         /* STATE B: Role-Specific Sign In Form */

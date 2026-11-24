@@ -615,22 +615,27 @@ describe("CookCue Institutional Onboarding & Lifecycle Verification", () => {
   });
 
   it("12. Diagnostic SMTP Connection Verification", async () => {
-    // 1. When SMTP is configured with real credentials
-    const diag = await verifySmtpConnection();
-    expect(diag.configured).toBe(true);
-    expect(diag.verified).toBe(true);
-    expect(diag.message).toContain("SMTP connection established and verified");
-
-    // 2. When SMTP host is missing
-    const host = process.env.SMTP_HOST;
+    const originalHost = process.env.SMTP_HOST;
     try {
+      // 1. When SMTP is configured (mocked or real)
+      process.env.SMTP_HOST = originalHost || "smtp.example.com";
+      const diag = await verifySmtpConnection();
+      expect(diag.configured).toBe(true);
+      expect(diag.verified).toBe(true);
+      expect(diag.message).toContain("SMTP connection established and verified");
+
+      // 2. When SMTP host is missing
       delete process.env.SMTP_HOST;
       const unconfiguredDiag = await verifySmtpConnection();
       expect(unconfiguredDiag.configured).toBe(false);
       expect(unconfiguredDiag.verified).toBe(false);
       expect(unconfiguredDiag.message).toContain("SMTP is not configured");
     } finally {
-      process.env.SMTP_HOST = host;
+      if (originalHost !== undefined) {
+        process.env.SMTP_HOST = originalHost;
+      } else {
+        delete process.env.SMTP_HOST;
+      }
     }
   }, 15000);
 
