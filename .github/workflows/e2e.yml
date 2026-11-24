@@ -57,6 +57,17 @@ jobs:
       - name: Seed test accounts and initial facilities
         run: npm run db:seed && npm run db:seed-demo
 
+      - name: Create CI environment file
+        run: |
+          cat << 'EOF' > .env
+          DATABASE_URL=postgresql://postgres:password@localhost:5434/messwise
+          SESSION_SECRET=ci_test_environment_session_secret_at_least_32_characters_long
+          FOUNDER_NOTIFICATION_EMAIL=cookcue149@gmail.com
+          APP_BASE_URL=http://127.0.0.1:3001
+          PORT=3001
+          DISABLE_REAL_EMAIL=true
+          EOF
+
       - name: Build Next.js application
         run: npm run build
 

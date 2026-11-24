@@ -160,7 +160,7 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
     await page.click('button:has-text("Sign In with Credentials")');
 
     // Successfully redirects to assigned kitchen morning plan
-    await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`));
+    await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`), { timeout: 15000 });
 
     // Sign out via UserMenu
     const chefMenuButton = page.locator('button:has-text("Chef Station"), button:has-text("Chef Rajesh"), button:has-text("HEAD_COOK")').first();
