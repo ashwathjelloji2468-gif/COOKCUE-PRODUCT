@@ -22,6 +22,7 @@ tsconfig.tsbuildinfo
 # Local database dumps and backups
 *.dump
 *.sql.gz
+*.zip
 backup*.sql
 dump*.sql
 /backups/
