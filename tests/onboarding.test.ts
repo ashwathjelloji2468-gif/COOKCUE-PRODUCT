@@ -775,7 +775,11 @@ describe("CookCue Institutional Onboarding & Lifecycle Verification", () => {
       expect(retriedSent.length).toBe(1);
       expect(retriedSent[0].to).toBe(founderA);
     } finally {
-      process.env.FOUNDER_NOTIFICATION_EMAIL = originalFounderConfig;
+      if (originalFounderConfig === undefined) {
+        delete process.env.FOUNDER_NOTIFICATION_EMAIL;
+      } else {
+        process.env.FOUNDER_NOTIFICATION_EMAIL = originalFounderConfig;
+      }
     }
   });
 

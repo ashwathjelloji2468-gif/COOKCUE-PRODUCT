@@ -17,7 +17,6 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        channel: "chrome",
       },
     },
   ],
@@ -30,6 +29,8 @@ export default defineConfig({
       PORT: "3001",
       APP_BASE_URL: "http://127.0.0.1:3001",
       DISABLE_REAL_EMAIL: "true",
+      DATABASE_URL: process.env.DATABASE_URL || "",
+      SESSION_SECRET: process.env.SESSION_SECRET || "ci_test_environment_session_secret_at_least_32_characters_long",
     },
   },
 });

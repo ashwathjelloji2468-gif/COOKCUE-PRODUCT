@@ -21,10 +21,16 @@ jobs:
         ports:
           - 5434:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d messwise"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5434/messwise
+      SESSION_SECRET: ci_test_environment_session_secret_at_least_32_characters_long
+      FOUNDER_NOTIFICATION_EMAIL: cookcue149@gmail.com
+      PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:3001
 
     steps:
       - name: Checkout repository
@@ -39,30 +45,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Install Playwright Browsers with dependencies
         run: npx playwright install --with-deps chromium
 
       - name: Run Prisma Database Migrations
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5434/messwise
         run: npx prisma migrate deploy
 
       - name: Seed test accounts and initial facilities
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5434/messwise
         run: npm run db:seed
 
       - name: Build Next.js application
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5434/messwise
-          SESSION_SECRET: ci_test_environment_session_secret_at_least_32_characters_long
         run: npm run build
 
       - name: Execute Playwright Browser Journeys
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5434/messwise
-          SESSION_SECRET: ci_test_environment_session_secret_at_least_32_characters_long
-          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
         run: npx playwright test
 
       - name: Upload Playwright Test Report Artifacts

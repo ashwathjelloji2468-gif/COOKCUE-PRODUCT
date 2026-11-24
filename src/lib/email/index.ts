@@ -30,11 +30,16 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
  * Trims whitespace, validates format, removes duplicates, and rejects invalid configurations.
  */
 export function parseFounderEmails(raw?: string): string[] {
+  const envVal =
+    process.env.FOUNDER_NOTIFICATION_EMAIL &&
+    process.env.FOUNDER_NOTIFICATION_EMAIL !== "undefined"
+      ? process.env.FOUNDER_NOTIFICATION_EMAIL
+      : process.env.FOUNDER_EMAIL && process.env.FOUNDER_EMAIL !== "undefined"
+      ? process.env.FOUNDER_EMAIL
+      : undefined;
+
   const config =
-    raw ??
-    process.env.FOUNDER_NOTIFICATION_EMAIL ??
-    process.env.FOUNDER_EMAIL ??
-    "cookcue149@gmail.com";
+    (raw !== undefined ? raw : envVal) ?? "cookcue149@gmail.com";
 
   if (!config || !config.trim()) {
     throw new Error(
