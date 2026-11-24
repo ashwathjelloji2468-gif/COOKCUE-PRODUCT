@@ -23,6 +23,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://messwise:messwise@localhost:5432/messwise
+      SESSION_SECRET: ci_test_environment_session_secret_at_least_32_characters_long
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
