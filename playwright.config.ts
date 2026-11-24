@@ -25,6 +25,8 @@ export default defineConfig({
     url: "http://127.0.0.1:3001",
     reuseExistingServer: false,
     timeout: 120 * 1000,
+    stdout: "pipe",
+    stderr: "pipe",
     env: {
       PORT: "3001",
       APP_BASE_URL: "http://127.0.0.1:3001",

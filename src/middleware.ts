@@ -31,13 +31,25 @@ export async function middleware(request: NextRequest) {
   // 1. Verify Cryptographic HMAC-SHA256 signature via Web Crypto API (Edge compliant)
   // Try cookcue_session first; fall back to legacy messwise_session if cookcue_session is absent or invalid
   let session = cookcueToken ? await verifySessionToken<SessionUser>(cookcueToken) : null;
+  let failSource = "";
+  if (cookcueToken && !session) {
+    failSource = "cookcue";
+    console.error("[middleware] Failed to verify cookcue_session token");
+  }
   if (!session && messwiseToken) {
     session = await verifySessionToken<SessionUser>(messwiseToken);
+    if (!session) {
+      failSource = failSource ? `${failSource}+messwise` : "messwise";
+      console.error("[middleware] Failed to verify messwise_session token");
+    }
   }
 
   if (!session) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "invalid_session");
+    if (failSource) {
+      loginUrl.searchParams.set("source", failSource);
+    }
     const response = NextResponse.redirect(loginUrl);
     response.cookies.delete("cookcue_session");
     response.cookies.delete("messwise_session");
