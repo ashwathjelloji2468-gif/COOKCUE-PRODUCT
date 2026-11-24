@@ -159,7 +159,8 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
     await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`));
 
     // Sign out via UserMenu
-    await page.click('button:has-text("Chef Station")');
+    const chefMenuButton = page.locator('button:has-text("Chef Station"), button:has-text("Chef Rajesh"), button:has-text("HEAD_COOK")').first();
+    await chefMenuButton.click();
     await page.click('text=Sign out');
     await expect(page).toHaveURL(/\/login/);
   });
@@ -225,7 +226,8 @@ test.describe("CookCue Institutional Kitchen & Founder E2E Journeys", () => {
     await expect(page).toHaveURL(new RegExp(`/kitchen/${KITCHEN_A_ID}/morning`));
 
     // Sign out
-    await page.click('button:has-text("Chef Station")');
+    const chefMenuButton = page.locator('button:has-text("Chef Station"), button:has-text("Chef Rajesh"), button:has-text("HEAD_COOK")').first();
+    await chefMenuButton.click();
     await page.click('text=Sign out');
     await expect(page).toHaveURL(/\/login/);
 

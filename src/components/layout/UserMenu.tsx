@@ -78,6 +78,9 @@ export function UserMenu({
               {initials}
             </AvatarFallback>
           </Avatar>
+          {effectiveUser?.role === "HEAD_COOK" && (
+            <span className="sr-only">Chef Station</span>
+          )}
           {!collapsed && (
             <div className="flex flex-1 flex-col overflow-hidden text-left min-w-0">
               <span
@@ -94,7 +97,7 @@ export function UserMenu({
                   isDark ? "text-[#A3CFBB] font-medium" : "text-muted-foreground"
                 )}
               >
-                {displayRole}
+                {effectiveUser?.role === "HEAD_COOK" ? "Chef Station" : displayRole}
               </span>
             </div>
           )}
