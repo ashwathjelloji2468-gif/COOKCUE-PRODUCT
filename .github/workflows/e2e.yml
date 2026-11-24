@@ -72,7 +72,22 @@ jobs:
         run: npm run build
 
       - name: Execute Playwright Browser Journeys
-        run: npx playwright test
+        run: |
+          set -o pipefail
+          npx playwright test 2>&1 | tee playwright-output.log
+
+      - name: Inspect Playwright Failures and Diagnostic Logs
+        if: failure()
+        run: |
+          echo "=== PLAYWRIGHT SUMMARY FAILURES ==="
+          grep -E "(✘|Error:|Expected pattern:|Received string:)" playwright-output.log -C 3 || tail -n 100 playwright-output.log
+          echo "=== ERROR CONTEXT FILES ==="
+          for f in test-results/**/*.md; do
+            if [ -f "$f" ]; then
+              echo "--- $f ---"
+              cat "$f"
+            fi
+          done
 
       - name: Upload Playwright Test Report Artifacts
         if: always()
